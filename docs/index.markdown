@@ -1,6 +1,10 @@
-# Experimental tree-sitter support for Dart language
+---
+layout: home
+---
 
-## Overview
+Experimental support for Dart grammar for tree-sitter.
+
+# Overview
 
 Unlike the existing [tree-sitter-dart](https://github.com/UserNobody14/tree-sitter-dart) project,
 this one is fully automatically converted from the
@@ -32,17 +36,17 @@ and disadvatanges:
   we want to add those, we would have to also supply this information to the coverter as
   an additional input.
 
-## Evaluation
+# Evaluation
 
 As an evaluation, I've tried parsing all Dart files in the [Dart SDK repo](https://github.com/dart-lang/sdk) ([commit](e9df8dceab89790ddc55c8d0ed388fcfe8fe879f)).
 
 SDK is good in the sense that there are lots of test files that specifically test various syntax pecularities.
 
-### Methodology
+## Methodology
 
 **NOTE**: I only compare the binary `SUCCESS` vs `FAILED` results. That's obviously not very precise: it can be the case that we parse some file incorrectly, but there is still no error. This won't be detected.
 
-#### Getting results for the new parser
+### Getting results for the new parser
 
 I've found all Dart files using
 
@@ -60,15 +64,15 @@ tree-sitter parse -q -s -t sdk-sources.lst
 
 Output of this command can be found in [file](evaluation_results/sdk-parse-stats.txt).
 
-#### Baseline for the comparison
+### Baseline for the comparison
 
 It's most natural to compare the new parser with the spec parser, that was used as a source.
 
 Additionally I also test the new parser vs the actual Dart implementation, to be some absolute numbers.
 
-#### Results
+### Results
 
-##### The new parser vs the spec parser
+#### The new parser vs the spec parser
 
 |                                                                                        |         |
 | -------------------------------------------------------------------------------------- | ------- |
@@ -84,7 +88,7 @@ The overall precision of 98.69% is not super exciting, I'd hope to get much clos
 
 I've analyzed most of false negatives and found 2 issues, explaining them. See [Known Issues](#known-issues).
 
-##### The new parser vs the actual implementation
+#### The new parser vs the actual implementation
 
 **NOTE**: the spec parser used in the conversion _does_ support `augment` keyword related syntax, but _doesn't_ support `macro`. But in the actual implementation, both are gated by the `macros` language feature, so either both are enabled, or both are disabled. So we could either increase the false negatives number by enabling the feature or increase the false positives number by keeping the feature disabled. I've opted into keeping it disabled, as I'm more interested in false negative cases.
 
@@ -98,9 +102,9 @@ I've analyzed most of false negatives and found 2 issues, explaining them. See [
 | False positives in the converted parser vs the reference parser                             | 1.861%  |
 | Precision the converted parser vs the reference parser                                      | 97.637% |
 
-## Known Issues
+# Known Issues
 
-### Record literals vs types vs patterns
+## Record literals vs types vs patterns
 
 There are a number of cases there record literals are not parsed correctly. This issue cause nearly half of false negative cases.
 
@@ -130,7 +134,7 @@ a bug in tree-sitter.
 
 TODO: file bug, add link
 
-### `//` inside multi-line comment
+## `//` inside multi-line comment
 
 Single line comment `//` inside multi-line comment can hide `/*` or `*/`. In Dart `//` has no
 special meaning inside a multi-line comment, but because comments are implemented using the
@@ -147,7 +151,7 @@ This issue seems to be causing the other half of false negatives.
 
 I've filed a [FR](https://github.com/tree-sitter/tree-sitter/issues/3225) asking to make `extras` non-recursive.
 
-### Spurious identifiers
+## Spurious identifiers
 
 Dart is pretty picky wrt which identifier is allowed in which place. For example, `as` is fine as a variable name, but not as a type name. This leads to somewhat complicated grammar rules for identifiers and certainly contributes to the [issue with record literals](#record-literals-vs-types-vs-patterns).
 
